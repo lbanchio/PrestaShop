@@ -611,7 +611,7 @@ class CartCore extends ObjectModel
         // Build SELECT
         $sql->select('cp.`id_product_attribute`, cp.`id_product`, cp.`quantity` AS cart_quantity, cp.id_shop, cp.`id_customization`, pl.`name`, p.`is_virtual`,
                         pl.`description_short`, pl.`available_now`, pl.`available_later`, product_shop.`id_category_default`, p.`id_supplier`,
-                        p.`id_manufacturer`, product_shop.`on_sale`, product_shop.`ecotax`, product_shop.`additional_shipping_cost`,
+                        p.`id_manufacturer`, m.`name` AS manufacturer_name, product_shop.`on_sale`, product_shop.`ecotax`, product_shop.`additional_shipping_cost`,
                         product_shop.`available_for_order`, product_shop.`price`, product_shop.`active`, product_shop.`unity`, product_shop.`unit_price_ratio`,
                         stock.`quantity` AS quantity_available, p.`width`, p.`height`, p.`depth`, stock.`out_of_stock`, p.`weight`,
                         p.`date_add`, p.`date_upd`, IFNULL(stock.quantity, 0) as quantity, pl.`link_rewrite`, cl.`link_rewrite` AS category,
@@ -639,6 +639,7 @@ class CartCore extends ObjectModel
         );
 
         $sql->leftJoin('product_supplier', 'ps', 'ps.`id_product` = cp.`id_product` AND ps.`id_product_attribute` = cp.`id_product_attribute` AND ps.`id_supplier` = p.`id_supplier`');
+        $sql->leftJoin('manufacturer', 'm', 'm.`id_manufacturer` = p.`id_manufacturer`');
 
         // @todo test if everything is ok, then refactorise call of this method
         $sql->join(Product::sqlStock('cp', 'cp'));
@@ -3203,7 +3204,7 @@ class CartCore extends ObjectModel
      */
     public function getOrderShippingCost($id_carrier = null, $use_tax = true, Country $default_country = null, $product_list = null)
     {
-        Tools::displayAsDeprecated();
+        Tools::displayAsDeprecated('Use Cart->getPackageShippingCost()');
         return $this->getPackageShippingCost((int)$id_carrier, $use_tax, $default_country, $product_list);
     }
 
@@ -3271,7 +3272,7 @@ class CartCore extends ObjectModel
         }
 
         // Order total in default currency without fees
-        $order_total = $this->getOrderTotal(true, Cart::ONLY_PHYSICAL_PRODUCTS_WITHOUT_SHIPPING, $product_list);
+        $order_total = $this->getOrderTotal(true, Cart::BOTH_WITHOUT_SHIPPING, $product_list);
 
         // Start with shipping cost at 0
         $shipping_cost = 0;
@@ -3940,7 +3941,7 @@ class CartCore extends ObjectModel
      */
     public function deletePictureToProduct($id_product, $index)
     {
-        Tools::displayAsDeprecated();
+        Tools::displayAsDeprecated('Use deleteCustomizationToProduct() instead');
         return $this->deleteCustomizationToProduct($id_product, 0);
     }
 
